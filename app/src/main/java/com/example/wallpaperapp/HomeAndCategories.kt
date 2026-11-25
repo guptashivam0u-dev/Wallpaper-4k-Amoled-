@@ -203,4 +203,116 @@ fun CategoriesScreen(
                     }
                 }
                 catPhotos.isEmpty() -> {
-                  
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(text = "No wallpapers found.", color = TextGray, fontSize = 14.sp)
+                    }
+                }
+                catPhotos.isEmpty() -> {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(text = "No wallpapers found.", color = TextGray, fontSize = 14.sp)
+                    }
+                }
+                else -> {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(3),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                        contentPadding = PaddingValues(bottom = 80.dp)
+                    ) {
+                        items(catPhotos, key = { it.id }) { ph ->
+                            WallpaperGridItem(
+                                photo = ph,
+                                isFav = false,
+                                onToggleFav = {},
+                                onClick = { onSelectPhoto(ph) }
+                            )
+                        }
+                    }
+                }
+            }
+        } else {
+            Text(
+                text = "Categories",
+                color = Color.White,
+                fontSize = 26.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "Discover something made for your screen",
+                color = TextGray,
+                fontSize = 13.sp
+            )
+            Spacer(Modifier.height(16.dp))
+
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(bottom = 80.dp)
+            ) {
+                items(cats, key = { it.name }) { cat ->
+                    Box(
+                        modifier = Modifier
+                            .height(150.dp)
+                            .clip(RoundedCornerShape(18.dp))
+                            .background(Brush.verticalGradient(listOf(Color(0xFF1F3310), CardDark)))
+                            .border(1.dp, BorderGreen, RoundedCornerShape(18.dp))
+                            .clickable { selectedCat = cat }
+                    ) {
+                        Text(
+                            text = cat.name,
+                            color = Color.White,
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier
+                                .align(Alignment.BottomStart)
+                                .padding(16.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun WelcomeScreen(onOpenWallpapers: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(BgBlack)
+            .padding(24.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = "4K Amoled",
+                color = Color.White,
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = "Ultra crisp dark wallpapers for your screen",
+                color = TextGray,
+                fontSize = 14.sp
+            )
+            Spacer(Modifier.height(32.dp))
+            Button(
+                onClick = onOpenWallpapers,
+                colors = ButtonDefaults.buttonColors(containerColor = NeonGreen),
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp)
+            ) {
+                Text(
+                    text = "Explore Wallpapers",
+                    color = Color.Black,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
+}
