@@ -31,30 +31,14 @@ import coil.compose.AsyncImage
 
 @Composable
 fun HomeScreen(
-    api: UnsplashApiService,
+    photos: List<UnsplashPhoto>,
+    isLoading: Boolean,
+    favCount: Int,
+    recentCount: Int,
     favourites: List<UnsplashPhoto>,
     onToggleFav: (UnsplashPhoto) -> Unit,
     onSelectPhoto: (UnsplashPhoto) -> Unit
 ) {
-    val tabs = remember { listOf("Trending", "4K Amoled", "Dark", "Minimal", "Nature", "Neon") }
-    var selectedTab by remember { mutableStateOf("Trending") }
-    var searchQuery by remember { mutableStateOf("") }
-    var photos by remember { mutableStateOf<List<UnsplashPhoto>>(emptyList()) }
-    var loading by remember { mutableStateOf(false) }
-
-    LaunchedEffect(selectedTab) {
-        loading = true
-        try {
-            if (UNSPLASH_API_KEY != "YOUR_UNSPLASH_API_KEY") {
-                val query = if (selectedTab == "Trending") "amoled 4k dark wallpaper" else "$selectedTab wallpaper"
-                photos = api.searchPhotos(UNSPLASH_API_KEY, query).results
-            }
-        } catch (_: Exception) {
-        } finally {
-            loading = false
-        }
-    }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -68,66 +52,13 @@ fun HomeScreen(
             fontWeight = FontWeight.Bold
         )
         Text(
-            text = "Ultra crisp dark wallpapers for your display",
+            text = "Saved: $favCount  •  Applied: $recentCount",
             color = TextGray,
             fontSize = 13.sp
         )
-        Spacer(Modifier.height(14.dp))
+        Spacer(Modifier.height(16.dp))
 
-        // Search Bar
-        OutlinedTextField(
-            value = searchQuery,
-            onValueChange = { searchQuery = it },
-            placeholder = { Text("Search wallpapers...", color = TextGray, fontSize = 14.sp) },
-            singleLine = true,
-            trailingIcon = {
-                IconButton(onClick = {
-                    if (searchQuery.isNotBlank() && UNSPLASH_API_KEY != "YOUR_UNSPLASH_API_KEY") {
-                        selectedTab = searchQuery
-                    }
-                }) {
-                    Icon(Icons.Default.Search, contentDescription = "Search", tint = NeonGreen)
-                }
-            },
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = Color.White,
-                unfocusedTextColor = Color.White,
-                focusedBorderColor = NeonGreen,
-                unfocusedBorderColor = BorderGreen,
-                focusedContainerColor = CardDark,
-                unfocusedContainerColor = CardDark
-            ),
-            shape = RoundedCornerShape(14.dp),
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(Modifier.height(12.dp))
-
-        // Filter Chips
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(tabs) { tab ->
-                val isSelected = selectedTab == tab
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(if (isSelected) NeonGreen else CardDark)
-                        .border(1.dp, if (isSelected) NeonGreen else BorderGreen, RoundedCornerShape(20.dp))
-                        .clickable { selectedTab = tab }
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    Text(
-                        text = tab,
-                        color = if (isSelected) Color.Black else Color.White,
-                        fontSize = 13.sp,
-                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                    )
-                }
-            }
-        }
-
-        Spacer(Modifier.height(14.dp))
-
-        if (loading) {
+        if (isLoading) {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = NeonGreen)
             }
