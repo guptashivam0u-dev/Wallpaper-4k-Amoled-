@@ -51,7 +51,7 @@ fun WallpaperAppRoot() {
 
     val api = remember {
         Retrofit.Builder()
-            .baseUrl("https://unsplash.com")
+            .baseUrl("https://api.unsplash.com/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(UnsplashApiService::class.java)
