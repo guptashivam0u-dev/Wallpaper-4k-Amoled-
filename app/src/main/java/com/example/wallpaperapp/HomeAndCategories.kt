@@ -4,15 +4,18 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,19 +23,136 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 
-                @Composable
+@Composable
+fun HomeScreen(
+    api: UnsplashApiService,
+    favourites: List<UnsplashPhoto>,
+    onToggleFav: (UnsplashPhoto) -> Unit,
+    onSelectPhoto: (UnsplashPhoto) -> Unit
+) {
+    val tabs = remember { listOf("Trending", "4K Amoled", "Dark", "Minimal", "Nature", "Neon") }
+    var selectedTab by remember { mutableStateOf("Trending") }
+    var searchQuery by remember { mutableStateOf("") }
+    var photos by remember { mutableStateOf<List<UnsplashPhoto>>(emptyList()) }
+    var loading by remember { mutableStateOf(false) }
+
+    LaunchedEffect(selectedTab) {
+        loading = true
+        try {
+            if (UNSPLASH_API_KEY != "YOUR_UNSPLASH_API_KEY") {
+                val query = if (selectedTab == "Trending") "amoled 4k dark wallpaper" else "$selectedTab wallpaper"
+                photos = api.searchPhotos(UNSPLASH_API_KEY, query).results
+            }
+        } catch (_: Exception) {
+        } finally {
+            loading = false
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp)
+    ) {
+        Spacer(Modifier.height(16.dp))
+        Text(
+            text = "4K Amoled",
+            color = Color.White,
+            fontSize = 26.sp,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = "Ultra crisp dark wallpapers for your display",
+            color = TextGray,
+            fontSize = 13.sp
+        )
+        Spacer(Modifier.height(14.dp))
+
+        // Search Bar
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = { searchQuery = it },
+            placeholder = { Text("Search wallpapers...", color = TextGray, fontSize = 14.sp) },
+            singleLine = true,
+            trailingIcon = {
+                IconButton(onClick = {
+                    if (searchQuery.isNotBlank() && UNSPLASH_API_KEY != "YOUR_UNSPLASH_API_KEY") {
+                        selectedTab = searchQuery
+                    }
+                }) {
+                    Icon(Icons.Default.Search, contentDescription = "Search", tint = NeonGreen)
+                }
+            },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedTextColor = Color.White,
+                unfocusedTextColor = Color.White,
+                focusedBorderColor = NeonGreen,
+                unfocusedBorderColor = BorderGreen,
+                focusedContainerColor = CardDark,
+                unfocusedContainerColor = CardDark
+            ),
+            shape = RoundedCornerShape(14.dp),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(Modifier.height(12.dp))
+
+        // Filter Chips
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            items(tabs) { tab ->
+                val isSelected = selectedTab == tab
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(if (isSelected) NeonGreen else CardDark)
+                        .border(1.dp, if (isSelected) NeonGreen else BorderGreen, RoundedCornerShape(20.dp))
+                        .clickable { selectedTab = tab }
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    Text(
+                        text = tab,
+                        color = if (isSelected) Color.Black else Color.White,
+                        fontSize = 13.sp,
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                    )
+                }
+            }
+        }
+
+        Spacer(Modifier.height(14.dp))
+
+        if (loading) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = NeonGreen)
+            }
+        } else {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(3),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                contentPadding = PaddingValues(bottom = 80.dp)
+            ) {
+                items(photos, key = { it.id }) { ph ->
+                    val isFav = favourites.any { it.id == ph.id }
+                    WallpaperGridItem(
+                        photo = ph,
+                        isFav = isFav,
+                        onToggleFav = { onToggleFav(ph) },
+                        onClick = { onSelectPhoto(ph) }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun WallpaperGridItem(
     photo: UnsplashPhoto,
     isFav: Boolean,
@@ -152,71 +272,4 @@ fun CategoriesScreen(
                     }
                 }
                 catPhotos.isEmpty() -> {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(text = "No wallpapers found.", color = TextGray, fontSize = 14.sp)
-                    }
-                }
-                else -> {
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(3),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp),
-                        contentPadding = PaddingValues(bottom = 80.dp)
-                    ) {
-                        items(catPhotos, key = { it.id }) { ph ->
-                            WallpaperGridItem(
-                                photo = ph,
-                                isFav = false,
-                                onToggleFav = {},
-                                onClick = { onSelectPhoto(ph) }
-                            )
-                        }
-                    }
-                }
-            }
-        } else {
-            Text(
-                text = "Categories",
-                color = Color.White,
-                fontSize = 26.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = "Discover something made for your screen",
-                color = TextGray,
-                fontSize = 13.sp
-            )
-            Spacer(Modifier.height(16.dp))
-
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(bottom = 80.dp)
-            ) {
-                items(cats, key = { it.name }) { cat ->
-                    Box(
-                        modifier = Modifier
-                            .height(150.dp)
-                            .clip(RoundedCornerShape(18.dp))
-                            .background(Brush.verticalGradient(listOf(Color(0xFF1F3310), CardDark)))
-                            .border(1.dp, BorderGreen, RoundedCornerShape(18.dp))
-                            .clickable { selectedCat = cat }
-                    ) {
-                        Text(
-                            text = cat.name,
-                            color = Color.White,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            modifier = Modifier
-                                .align(Alignment.BottomStart)
-                                .padding(16.dp)
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-   
+                  
