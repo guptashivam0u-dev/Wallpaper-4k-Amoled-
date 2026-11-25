@@ -2,6 +2,7 @@ package com.example.wallpaperapp
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -48,6 +49,16 @@ fun WallpaperAppRoot() {
     val recentlyApplied = remember { mutableStateListOf<UnsplashPhoto>() }
     var homePhotos by remember { mutableStateOf<List<UnsplashPhoto>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
+
+    // --- BACK BUTTON / SIDE SWIPE FIX ---
+    BackHandler(enabled = previewPhoto != null || (!showWelcome && selectedTab != 1)) {
+        if (previewPhoto != null) {
+            previewPhoto = null // Wallpaper preview band karke wapas list par jayega
+        } else if (selectedTab != 1) {
+            selectedTab = 1 // Kisi bhi doosre tab se wapas Home tab par jayega
+        }
+    }
+    // ------------------------------------
 
     val api = remember {
         Retrofit.Builder()
