@@ -17,7 +17,7 @@ val NeonGreen = Color(0xFF8CE62E)
 val BorderGreen = Color(0xFF284214)
 val TextGray = Color(0xFF9EA69E)
 
-const val UNSPLASH_API_KEY = "YOUR_UNSPLASH_API_KEY"
+const val UNSPLASH_API_KEY = "j6I6E53KGj8Wbeq7A17r195_-iTyO8ypaSQEfh-KTcM"
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
