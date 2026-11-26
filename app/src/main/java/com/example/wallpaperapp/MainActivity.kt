@@ -9,6 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -49,20 +50,23 @@ fun WallpaperAppRoot() {
     val recentlyApplied = remember { mutableStateListOf<UnsplashPhoto>() }
     var homePhotos by remember { mutableStateOf<List<UnsplashPhoto>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
+    var isLoadingMore by remember { mutableStateOf(false) }
+    var currentPage by remember { mutableStateOf(1) }
+    val coroutineScope = rememberCoroutineScope()
 
     // --- BACK BUTTON / SIDE SWIPE FIX ---
     BackHandler(enabled = previewPhoto != null || (!showWelcome && selectedTab != 1)) {
         if (previewPhoto != null) {
-            previewPhoto = null // Wallpaper preview band karke wapas list par jayega
+            previewPhoto = null
         } else if (selectedTab != 1) {
-            selectedTab = 1 // Kisi bhi doosre tab se wapas Home tab par jayega
+            selectedTab = 1
         }
     }
     // ------------------------------------
 
     val api = remember {
         Retrofit.Builder()
-            .baseUrl("https://api.unsplash.com/")
+            .baseUrl("https://unsplash.com")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(UnsplashApiService::class.java)
@@ -71,12 +75,33 @@ fun WallpaperAppRoot() {
     LaunchedEffect(Unit) {
         try {
             if (UNSPLASH_API_KEY != "YOUR_UNSPLASH_API_KEY") {
-                homePhotos = api.getPhotos(UNSPLASH_API_KEY)
+                homePhotos = api.getPhotos(UNSPLASH_API_KEY, page = 1, perPage = 30)
             }
         } catch (e: Exception) {
             e.printStackTrace()
         } finally {
             isLoading = false
+        }
+    }
+
+    fun loadMoreHomePhotos() {
+        if (isLoadingMore || isLoading) return
+        isLoadingMore = true
+        coroutineScope.launch {
+            try {
+                val nextPage = currentPage + 1
+                val newPhotos = api.getPhotos(UNSPLASH_API_KEY, page = nextPage, perPage = 30)
+                if (newPhotos.isNotEmpty()) {
+                    val existingIds = homePhotos.map { it.id }.toSet()
+                    val uniqueNew = newPhotos.filter { it.id !in existingIds }
+                    homePhotos = homePhotos + uniqueNew
+                    currentPage = nextPage
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                isLoadingMore = false
+            }
         }
     }
 
@@ -116,6 +141,8 @@ fun WallpaperAppRoot() {
                     1 -> HomeScreen(
                         photos = homePhotos,
                         isLoading = isLoading,
+                        isLoadingMore = isLoadingMore,
+                        onLoadMore = { loadMoreHomePhotos() },
                         favCount = favourites.size,
                         recentCount = recentlyApplied.size,
                         favourites = favourites,
