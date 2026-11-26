@@ -4,18 +4,17 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -33,12 +32,30 @@ import coil.compose.AsyncImage
 fun HomeScreen(
     photos: List<UnsplashPhoto>,
     isLoading: Boolean,
+    isLoadingMore: Boolean = false,
+    onLoadMore: () -> Unit = {},
     favCount: Int,
     recentCount: Int,
     favourites: List<UnsplashPhoto>,
     onToggleFav: (UnsplashPhoto) -> Unit,
     onSelectPhoto: (UnsplashPhoto) -> Unit
 ) {
+    val gridState = rememberLazyGridState()
+
+    val shouldLoadMore by remember {
+        derivedStateOf {
+            val totalItems = gridState.layoutInfo.totalItemsCount
+            val lastVisible = gridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+            totalItems > 0 && lastVisible >= totalItems - 6
+        }
+    }
+
+    LaunchedEffect(shouldLoadMore) {
+        if (shouldLoadMore) {
+            onLoadMore()
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -64,6 +81,7 @@ fun HomeScreen(
             }
         } else {
             LazyVerticalGrid(
+                state = gridState,
                 columns = GridCells.Fixed(3),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -77,6 +95,22 @@ fun HomeScreen(
                         onToggleFav = { onToggleFav(ph) },
                         onClick = { onSelectPhoto(ph) }
                     )
+                }
+
+                if (isLoadingMore) {
+                    item(span = { GridItemSpan(3) }) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                color = NeonGreen,
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -144,15 +178,28 @@ fun CategoriesScreen(
     var selectedCat by remember { mutableStateOf<CategoryItem?>(null) }
     var catPhotos by remember { mutableStateOf<List<UnsplashPhoto>>(emptyList()) }
     var loading by remember { mutableStateOf(false) }
+    var loadingMore by remember { mutableStateOf(false) }
+    var catPage by remember { mutableStateOf(1) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    val catGridState = rememberLazyGridState()
+
+    val shouldLoadMoreCat by remember {
+        derivedStateOf {
+            val totalItems = catGridState.layoutInfo.totalItemsCount
+            val lastVisible = catGridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+            totalItems > 0 && lastVisible >= totalItems - 6
+        }
+    }
 
     LaunchedEffect(selectedCat) {
         val currentCat = selectedCat ?: return@LaunchedEffect
         loading = true
         errorMessage = null
+        catPage = 1
         try {
             if (UNSPLASH_API_KEY != "YOUR_UNSPLASH_API_KEY") {
-                catPhotos = api.searchPhotos(UNSPLASH_API_KEY, currentCat.query).results
+                catPhotos = api.searchPhotos(UNSPLASH_API_KEY, currentCat.query, page = 1, perPage = 30).results
             } else {
                 errorMessage = "Missing Unsplash API Key"
             }
@@ -160,6 +207,27 @@ fun CategoriesScreen(
             errorMessage = "Failed to load wallpapers."
         } finally {
             loading = false
+        }
+    }
+
+    LaunchedEffect(shouldLoadMoreCat) {
+        val currentCat = selectedCat ?: return@LaunchedEffect
+        if (shouldLoadMoreCat && !loading && !loadingMore) {
+            loadingMore = true
+            try {
+                val nextPage = catPage + 1
+                val moreResults = api.searchPhotos(UNSPLASH_API_KEY, currentCat.query, page = nextPage, perPage = 30).results
+                if (moreResults.isNotEmpty()) {
+                    val existingIds = catPhotos.map { it.id }.toSet()
+                    val uniqueNew = moreResults.filter { it.id !in existingIds }
+                    catPhotos = catPhotos + uniqueNew
+                    catPage = nextPage
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                loadingMore = false
+            }
         }
     }
 
@@ -207,112 +275,7 @@ fun CategoriesScreen(
                         Text(text = "No wallpapers found.", color = TextGray, fontSize = 14.sp)
                     }
                 }
-                catPhotos.isEmpty() -> {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(text = "No wallpapers found.", color = TextGray, fontSize = 14.sp)
-                    }
-                }
                 else -> {
                     LazyVerticalGrid(
-                        columns = GridCells.Fixed(3),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp),
-                        contentPadding = PaddingValues(bottom = 80.dp)
-                    ) {
-                        items(catPhotos, key = { it.id }) { ph ->
-                            WallpaperGridItem(
-                                photo = ph,
-                                isFav = false,
-                                onToggleFav = {},
-                                onClick = { onSelectPhoto(ph) }
-                            )
-                        }
-                    }
-                }
-            }
-        } else {
-            Text(
-                text = "Categories",
-                color = Color.White,
-                fontSize = 26.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = "Discover something made for your screen",
-                color = TextGray,
-                fontSize = 13.sp
-            )
-            Spacer(Modifier.height(16.dp))
-
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(bottom = 80.dp)
-            ) {
-                items(cats, key = { it.name }) { cat ->
-                    Box(
-                        modifier = Modifier
-                            .height(150.dp)
-                            .clip(RoundedCornerShape(18.dp))
-                            .background(Brush.verticalGradient(listOf(Color(0xFF1F3310), CardDark)))
-                            .border(1.dp, BorderGreen, RoundedCornerShape(18.dp))
-                            .clickable { selectedCat = cat }
-                    ) {
-                        Text(
-                            text = cat.name,
-                            color = Color.White,
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            modifier = Modifier
-                                .align(Alignment.BottomStart)
-                                .padding(16.dp)
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun WelcomeScreen(onOpenWallpapers: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(BgBlack)
-            .padding(24.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = "4K Amoled",
-                color = Color.White,
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = "Ultra crisp dark wallpapers for your screen",
-                color = TextGray,
-                fontSize = 14.sp
-            )
-            Spacer(Modifier.height(32.dp))
-            Button(
-                onClick = onOpenWallpapers,
-                colors = ButtonDefaults.buttonColors(containerColor = NeonGreen),
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp)
-            ) {
-                Text(
-                    text = "Explore Wallpapers",
-                    color = Color.Black,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
-    }
-}
+                        state = catGridState,
+                        
