@@ -198,7 +198,7 @@ fun CategoriesScreen(
         errorMessage = null
         catPage = 1
         try {
-            if (UNSPLASH_API_KEY != "j6I6E53KGj8Wbeq7A17r195_-iTyO8ypaSQEfh-KTcM") {
+            if (UNSPLASH_API_KEY != "YOUR_UNSPLASH_API_KEY" && UNSPLASH_API_KEY.isNotBlank()) {
                 catPhotos = api.searchPhotos(UNSPLASH_API_KEY, currentCat.query, page = 1, perPage = 30).results
             } else {
                 errorMessage = "Missing Unsplash API Key"
