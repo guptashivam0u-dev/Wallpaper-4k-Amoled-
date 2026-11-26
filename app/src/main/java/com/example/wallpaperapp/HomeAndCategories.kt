@@ -167,7 +167,7 @@ fun CategoriesScreen(
             CategoryItem("Abstract", "abstract 3d dark", "https://unsplash.com"),
             CategoryItem("AI Generated", "digital art neon", "https://unsplash.com"),
             CategoryItem("Amoled", "amoled black dark", "https://unsplash.com"),
-            CategoryItem("Animals", "wild animal dark", "https://unsplash.com"),
+            CategoryItem("Animals", "wild animal dark", "https://raw.githubusercontent.com/guptashivam0u-dev/Wallpaper-4k-Amoled-/refs/heads/main/Meta_AI_AQP409Ca3dkKb9IC_SjaG2oyxrUR1TBHrpXSezYdpIw4Q-1CmX6dqxf6j19jYpo2X2pwdzBks6lOLfPwGhTOWNqz_20261127_004432.jpg"),
             CategoryItem("Anime", "anime aesthetic", "https://unsplash.com"),
             CategoryItem("Cars", "supercar dark", "https://unsplash.com"),
             CategoryItem("Flowers", "flowers aesthetic", "https://unsplash.com"),
