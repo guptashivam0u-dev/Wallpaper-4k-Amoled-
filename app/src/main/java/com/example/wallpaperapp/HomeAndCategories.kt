@@ -164,118 +164,6 @@ fun CategoriesScreen(
 ) {
     val cats = remember {
         listOf(
-            CategoryItem("Abstract", "abstract 3d dark", ""),
-            CategoryItem("AI Generated", "digital art neon", ""),
-            CategoryItem("Amoled", "amoled black dark", ""),
-            CategoryItem("Animals", "wild animal dark", ""),
-            CategoryItem("Anime", "anime aesthetic", ""),
-            CategoryItem("Cars", "supercar dark", ""),
-            CategoryItem("Flowers", "flowers aesthetic", ""),
-            CategoryItem("Food", "aesthetic food drink", "")
-        )
-    }
-
-    var selectedCat by remember { mutableStateOf<CategoryItem?>(null) }
-    var catPhotos by remember { mutableStateOf<List<UnsplashPhoto>>(emptyList()) }
-    var loading by remember { mutableStateOf(false) }
-    var loadingMore by remember { mutableStateOf(false) }
-    var catPage by remember { mutableStateOf(1) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
-
-    val catGridState = rememberLazyGridState()
-
-    val shouldLoadMoreCat by remember {
-        derivedStateOf {
-            val totalItems = catGridState.layoutInfo.totalItemsCount
-            val lastVisible = catGridState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-            totalItems > 0 && lastVisible >= totalItems - 6
-        }
-    }
-
-    LaunchedEffect(selectedCat) {
-        val currentCat = selectedCat ?: return@LaunchedEffect
-        loading = true
-        errorMessage = null
-        catPage = 1
-        try {
-            if (UNSPLASH_API_KEY != "YOUR_UNSPLASH_API_KEY" && UNSPLASH_API_KEY.isNotBlank()) {
-                catPhotos = api.searchPhotos(UNSPLASH_API_KEY, currentCat.query, page = 1, perPage = 30).results
-            } else {
-                errorMessage = "Missing Unsplash API Key"
-            }
-        } catch (e: Exception) {
-            errorMessage = "Failed to load wallpapers."
-        } finally {
-            loading = false
-        }
-    }
-
-    LaunchedEffect(shouldLoadMoreCat) {
-        val currentCat = selectedCat ?: return@LaunchedEffect
-        if (shouldLoadMoreCat && !loading && !loadingMore) {
-            loadingMore = true
-            try {
-                val nextPage = catPage + 1
-                val moreResults = api.searchPhotos(UNSPLASH_API_KEY, currentCat.query, page = nextPage, perPage = 30).results
-                if (moreResults.isNotEmpty()) {
-                    val existingIds = catPhotos.map { it.id }.toSet()
-                    val uniqueNew = moreResults.filter { it.id !in existingIds }
-                    catPhotos = catPhotos + uniqueNew
-                    catPage = nextPage
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            } finally {
-                loadingMore = false
-            }
-        }
-    }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp)
-    ) {
-        Spacer(Modifier.height(16.dp))
-
-        if (selectedCat != null) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = {
-                    selectedCat = null
-                    catPhotos = emptyList()
-                }) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowBack,
-                        contentDescription = "Back",
-                        tint = Color.White
-                    )
-                }
-                Text(
-                    text = selectedCat!!.name,
-                    color = Color.White,
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-                        Spacer(Modifier.height(12.dp))
-            when {
-                loading -> {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(color = NeonGreen)
-                    }
-                }
-                errorMessage != null -> {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(text = errorMessage!!, color = TextGray, fontSize = 14.sp)
-                    }
-                }
-@Composable
-fun CategoriesScreen(
-    api: UnsplashApiService,
-    onSelectPhoto: (UnsplashPhoto) -> Unit
-) {
-    val cats = remember {
-        listOf(
             CategoryItem("Abstract", "abstract 3d dark", "https://unsplash.com"),
             CategoryItem("AI Generated", "digital art neon", "https://unsplash.com"),
             CategoryItem("Amoled", "amoled black dark", "https://unsplash.com"),
@@ -450,6 +338,29 @@ fun CategoriesScreen(
                         )
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+fun WelcomeScreen(onOpenWallpapers: () -> Unit) {
+    Box(
+        modifier = Modifier.fillMaxSize().background(BgBlack).padding(24.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(text = "4K Amoled", color = Color.White, fontSize = 32.sp, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(8.dp))
+            Text(text = "Ultra crisp dark wallpapers for your screen", color = TextGray, fontSize = 14.sp)
+            Spacer(Modifier.height(32.dp))
+            Button(
+                onClick = onOpenWallpapers,
+                colors = ButtonDefaults.buttonColors(containerColor = NeonGreen),
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier.fillMaxWidth().height(52.dp)
+            ) {
+                Text(text = "Explore Wallpapers", color = Color.Black, fontSize = 16.sp, fontWeight = FontWeight.Bold)
             }
         }
     }
