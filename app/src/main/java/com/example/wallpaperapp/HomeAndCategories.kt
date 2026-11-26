@@ -278,4 +278,44 @@ fun CategoriesScreen(
                 else -> {
                     LazyVerticalGrid(
                         state = catGridState,
-                        
+@Composable
+fun WelcomeScreen(onOpenWallpapers: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(BgBlack)
+            .padding(24.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = "4K Amoled",
+                color = Color.White,
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = "Ultra crisp dark wallpapers for your screen",
+                color = TextGray,
+                fontSize = 14.sp
+            )
+            Spacer(Modifier.height(32.dp))
+            Button(
+                onClick = onOpenWallpapers,
+                colors = ButtonDefaults.buttonColors(containerColor = NeonGreen),
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp)
+            ) {
+                Text(
+                    text = "Explore Wallpapers",
+                    color = Color.Black,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
+}
