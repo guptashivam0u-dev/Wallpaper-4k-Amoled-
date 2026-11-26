@@ -174,7 +174,6 @@ fun CategoriesScreen(
             CategoryItem("Food", "aesthetic food drink", "https://unsplash.com")
         )
     }
-
     var selectedCat by remember { mutableStateOf<CategoryItem?>(null) }
     var catPhotos by remember { mutableStateOf<List<UnsplashPhoto>>(emptyList()) }
     var loading by remember { mutableStateOf(false) }
