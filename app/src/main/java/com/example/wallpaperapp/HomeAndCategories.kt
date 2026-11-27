@@ -164,13 +164,13 @@ fun CategoriesScreen(
 ) {
     val cats = remember {
         listOf(
-            CategoryItem("Abstract", "abstract 3d dark", "https://unsplash.com"),
-            CategoryItem("AI Generated", "digital art neon", "https://unsplash.com"),
-            CategoryItem("Amoled", "amoled black dark", "https://unsplash.com"),
+            CategoryItem("Abstract", "abstract 3d dark", "https://raw.githubusercontent.com/guptashivam0u-dev/Wallpaper-4k-Amoled-/refs/heads/main/Meta_AI_AQNVhebh_gt6ScAN-kRtYkaw4iY8KSRc4njDPkkk7Zy8y97m_USSFjZcSgpY_Yz9zDd-Mw-aDyyHFmlQTc2CgojO_20261127_004509.jpg"),
+            CategoryItem("AI Generated", "digital art neon", "https://raw.githubusercontent.com/guptashivam0u-dev/Wallpaper-4k-Amoled-/refs/heads/main/Meta_AI_AQNWeg0fMMHfGXUnzX_2OuGHo158RoL7nKcYASNzlRml1iLQZ7Ir6Cr-sAOhCueEaROWh_AOZydcb7M51bdiC8Nj_20261127_004525.jpg"),
+            CategoryItem("Amoled", "amoled black dark", "https://raw.githubusercontent.com/guptashivam0u-dev/Wallpaper-4k-Amoled-/refs/heads/main/Meta_AI_AQODc_7ldwHaNtUy-XHNVl6PjpsPh0LriMYPs-e2UiIEv2yf8C_iIx_O-pqkYTUwABths4nb5MRTTdpkYmB8i9po_20261127_004706.jpg"),
             CategoryItem("Animals", "wild animal dark", "https://raw.githubusercontent.com/guptashivam0u-dev/Wallpaper-4k-Amoled-/refs/heads/main/Meta_AI_AQP409Ca3dkKb9IC_SjaG2oyxrUR1TBHrpXSezYdpIw4Q-1CmX6dqxf6j19jYpo2X2pwdzBks6lOLfPwGhTOWNqz_20261127_004432.jpg"),
-            CategoryItem("Anime", "anime aesthetic", "https://unsplash.com"),
-            CategoryItem("Cars", "supercar dark", "https://unsplash.com"),
-            CategoryItem("Flowers", "flowers aesthetic", "https://unsplash.com"),
+            CategoryItem("Anime", "anime aesthetic", "https://raw.githubusercontent.com/guptashivam0u-dev/Wallpaper-4k-Amoled-/refs/heads/main/Meta_AI_AQN3EKAY7Uc04sCn-FP_ZiNy1rGaiLlBFPC6KHEM0YV7TDH1JE7Dunt2p091EU1m9XwZrpqOnsCfJtzrux4Bl4uI_20261127_004831.jpg"),
+            CategoryItem("Cars", "supercar dark", "https://raw.githubusercontent.com/guptashivam0u-dev/Wallpaper-4k-Amoled-/refs/heads/main/Meta_AI_AQN2JUcXJ5oSpA5VB9L4IyUsMZObblnIJPKaW0oZ6DizQRczujwtWkbOKAJOOqQyaxQAU-fBPPhQQQWTNMpcuYDb_20261127_004632.jpg"),
+            CategoryItem("Flowers", "flowers aesthetic", "https://raw.githubusercontent.com/guptashivam0u-dev/Wallpaper-4k-Amoled-/refs/heads/main/Meta_AI_AQNkkJ-jgJLP9cd57fTZcf3x1H-IoqZW0FUKcZJyuyGbTsmrvSgcQBxEmYPyJmv8gJMoJmYwK4IBs1agI1oi8ymp_20261127_004420.jpg"),
             CategoryItem("Food", "aesthetic food drink", "https://unsplash.com")
         )
     }
