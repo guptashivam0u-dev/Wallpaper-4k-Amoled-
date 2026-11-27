@@ -171,7 +171,7 @@ fun CategoriesScreen(
             CategoryItem("Anime", "anime aesthetic", "https://raw.githubusercontent.com/guptashivam0u-dev/Wallpaper-4k-Amoled-/refs/heads/main/Meta_AI_AQN3EKAY7Uc04sCn-FP_ZiNy1rGaiLlBFPC6KHEM0YV7TDH1JE7Dunt2p091EU1m9XwZrpqOnsCfJtzrux4Bl4uI_20261127_004831.jpg"),
             CategoryItem("Cars", "supercar dark", "https://raw.githubusercontent.com/guptashivam0u-dev/Wallpaper-4k-Amoled-/refs/heads/main/Meta_AI_AQN2JUcXJ5oSpA5VB9L4IyUsMZObblnIJPKaW0oZ6DizQRczujwtWkbOKAJOOqQyaxQAU-fBPPhQQQWTNMpcuYDb_20261127_004632.jpg"),
             CategoryItem("Flowers", "flowers aesthetic", "https://raw.githubusercontent.com/guptashivam0u-dev/Wallpaper-4k-Amoled-/refs/heads/main/Meta_AI_AQNkkJ-jgJLP9cd57fTZcf3x1H-IoqZW0FUKcZJyuyGbTsmrvSgcQBxEmYPyJmv8gJMoJmYwK4IBs1agI1oi8ymp_20261127_004420.jpg"),
-            CategoryItem("Food", "aesthetic food drink", "https://unsplash.com")
+            CategoryItem("Food", "aesthetic food drink", "https://raw.githubusercontent.com/guptashivam0u-dev/Wallpaper-4k-Amoled-/refs/heads/main/Meta_AI_AQONkVTW0EUXuGPmjbroHLJo3LvvjU9UiaA072PIgk3F4yQgNkMU2EbOHDN4oYSXms0T6Gs4I-qYObjPzSBoxKC__20261127_004621.jpg")
         )
     }
     var selectedCat by remember { mutableStateOf<CategoryItem?>(null) }
