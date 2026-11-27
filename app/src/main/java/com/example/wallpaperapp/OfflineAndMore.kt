@@ -106,37 +106,7 @@ fun OfflineScreen(onSelectPhoto: (UnsplashPhoto) -> Unit) {
     }
 }
 
-@Composable
-fun MoreScreen(favCount: Int, recentCount: Int) {
-    val ctx = LocalContext.current
-    Column(Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
-        Spacer(Modifier.height(16.dp))
-        Text("More", color = Color.White, fontSize = 26.sp, fontWeight = FontWeight.Bold)
-        Text("Manage your experience.", color = TextGray, fontSize = 13.sp)
-        Spacer(Modifier.height(20.dp))
-        MoreRow(Icons.Outlined.FavoriteBorder, "My wallpapers", "$favCount favourites • $recentCount recently applied") {}
-        Spacer(Modifier.height(10.dp))
-        MoreRow(Icons.Outlined.Language, "Visit our website", null) {
-            ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://unsplash.com")))
-        }
-        Spacer(Modifier.height(10.dp))
-        MoreRow(Icons.Outlined.StarOutline, "Rate Us", null) {
-            Toast.makeText(ctx, "Thanks for your support!", Toast.LENGTH_SHORT).show()
-        }
-        Spacer(Modifier.height(10.dp))
-        MoreRow(Icons.Outlined.Share, "Share App", null) {
-            val i = Intent(Intent.ACTION_SEND).apply {
-                type = "text/plain"
-                putExtra(Intent.EXTRA_TEXT, "Check out 4K AMOLED Wallpapers!")
-            }
-            ctx.startActivity(Intent.createChooser(i, "Share"))
-        }
-        Spacer(Modifier.height(10.dp))
-        MoreRow(Icons.Outlined.Shield, "Privacy Policy", null) {}
-        Spacer(Modifier.height(10.dp))
-        MoreRow(Icons.Outlined.Info, "About", "Version 1.0 • 4K AMOLED Wallpapers") {}
-    }
-}
+
 
 @Composable
 fun MoreRow(icon: ImageVector, title: String, sub: String?, onClick: () -> Unit) {
@@ -154,6 +124,108 @@ fun MoreRow(icon: ImageVector, title: String, sub: String?, onClick: () -> Unit)
             }
         }
         Icon(Icons.Default.ChevronRight, null, tint = TextGray)
+    }
+}
+@Composable
+fun MoreScreen(
+    favourites: List<UnsplashPhoto>,
+    recentlyApplied: List<UnsplashPhoto>,
+    onSelectPhoto: (UnsplashPhoto) -> Unit
+) {
+    val ctx = LocalContext.current
+    var showMyWallpapers by remember { mutableStateOf(false) }
+    var subTab by remember { mutableStateOf(0) }
+
+    if (showMyWallpapers) {
+        val currentList = if (subTab == 0) favourites else recentlyApplied
+        Column(Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+            Spacer(Modifier.height(16.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = { showMyWallpapers = false }) {
+                    Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+                }
+                Text("My Wallpapers", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+            }
+            Spacer(Modifier.height(12.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                Button(
+                    onClick = { subTab = 0 },
+                    colors = ButtonDefaults.buttonColors(containerColor = if (subTab == 0) NeonGreen else CardDark),
+                    shape = RoundedCornerShape(20.dp),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Favourites (${favourites.size})", color = if (subTab == 0) Color.Black else Color.White, fontWeight = FontWeight.Bold)
+                }
+                Button(
+                    onClick = { subTab = 1 },
+                    colors = ButtonDefaults.buttonColors(containerColor = if (subTab == 1) NeonGreen else CardDark),
+                    shape = RoundedCornerShape(20.dp),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Applied (${recentlyApplied.size})", color = if (subTab == 1) Color.Black else Color.White, fontWeight = FontWeight.Bold)
+                }
+            }
+            Spacer(Modifier.height(16.dp))
+            if (currentList.isEmpty()) {
+                Box(Modifier.fillMaxSize().padding(bottom = 80.dp), contentAlignment = Alignment.Center) {
+                    Text(
+                        if (subTab == 0) "No favourite wallpapers yet." else "No applied wallpapers yet.",
+                        color = TextGray,
+                        fontSize = 14.sp
+                    )
+                }
+            } else {
+                LazyVerticalGrid(
+                    GridCells.Fixed(3),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    contentPadding = PaddingValues(bottom = 80.dp)
+                ) {
+                    items(currentList, key = { it.id }) { ph ->
+                        val isLocal = !ph.urls.small.startsWith("http")
+                        Box(Modifier.aspectRatio(0.58f).clip(RoundedCornerShape(16.dp)).clickable { onSelectPhoto(ph) }) {
+                            AsyncImage(
+                                model = if (isLocal) File(ph.urls.small) else ph.urls.small,
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+    else {
+        Column(Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+            Spacer(Modifier.height(16.dp))
+            Text("More", color = Color.White, fontSize = 26.sp, fontWeight = FontWeight.Bold)
+            Text("Manage your experience.", color = TextGray, fontSize = 13.sp)
+            Spacer(Modifier.height(20.dp))
+            MoreRow(Icons.Outlined.FavoriteBorder, "My wallpapers", "${favourites.size} favourites • ${recentlyApplied.size} recently applied") {
+                showMyWallpapers = true
+            }
+            Spacer(Modifier.height(10.dp))
+            MoreRow(Icons.Outlined.Language, "Visit our website", null) {
+                ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://unsplash.com")))
+            }
+            Spacer(Modifier.height(10.dp))
+            MoreRow(Icons.Outlined.StarOutline, "Rate Us", null) {
+                Toast.makeText(ctx, "Thanks for your support!", Toast.LENGTH_SHORT).show()
+            }
+            Spacer(Modifier.height(10.dp))
+            MoreRow(Icons.Outlined.Share, "Share App", null) {
+                val i = Intent(Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_TEXT, "Check out 4K AMOLED Wallpapers!")
+                }
+                ctx.startActivity(Intent.createChooser(i, "Share"))
+            }
+            Spacer(Modifier.height(10.dp))
+            MoreRow(Icons.Outlined.Shield, "Privacy Policy", null) {}
+            Spacer(Modifier.height(10.dp))
+            MoreRow(Icons.Outlined.Info, "About", "Version 1.0 • 4K AMOLED Wallpapers") {}
+        }
     }
 }
 
