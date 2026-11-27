@@ -103,7 +103,7 @@ data class LocalCategoryItem(val name: String, val query: String, val imageRes: 
 fun CategoriesScreen(api: UnsplashApiService, favourites: List<UnsplashPhoto>, onToggleFav: (UnsplashPhoto) -> Unit, onSelectPhoto: (UnsplashPhoto) -> Unit) {
     val cats = remember {
         listOf(
-            LocalCategoryItem("Abstract", "abstract 3d dark", R.drawable.abstract),
+            LocalCategoryItem("Abstract", "abstract 3d dark", R.drawable.cat_abstract),
             LocalCategoryItem("AI Generated", "digital art neon", R.drawable.ai),
             LocalCategoryItem("Amoled", "amoled black dark", R.drawable.amoled),
             LocalCategoryItem("Animals", "wild animal dark", R.drawable.animal),
