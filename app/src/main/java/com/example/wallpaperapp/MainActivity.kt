@@ -11,8 +11,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -26,20 +24,21 @@ val TextGray = Color(0xFF9EA69E)
 const val UNSPLASH_API_KEY = "j6I6E53KGj8Wbeq7A17r195_-iTyO8ypaSQEfh-KTcM"
 
 fun loadSavedList(ctx: Context, key: String): List<UnsplashPhoto> {
-    return try {
-        val prefs = ctx.getSharedPreferences("wallpaper_prefs", Context.MODE_PRIVATE)
-        val json = prefs.getString(key, null) ?: return emptyList()
-        val type = object : TypeToken<List<UnsplashPhoto>>() {}.type
-        Gson().fromJson<List<UnsplashPhoto>>(json, type)?.distinctBy { it.id } ?: emptyList()
-    } catch (_: Exception) { emptyList() }
+    val prefs = ctx.getSharedPreferences("wall_prefs", Context.MODE_PRIVATE)
+    val raw = prefs.getString(key, "") ?: ""
+    if (raw.isBlank()) return emptyList()
+    return raw.split(";;").mapNotNull { item ->
+        val p = item.split("|")
+        if (p.size >= 4) UnsplashPhoto(p[0], PhotoUrls(p[1], p[2], p[3])) else null
+    }.distinctBy { it.id }
 }
 
 fun savePhotoList(ctx: Context, key: String, list: List<UnsplashPhoto>) {
-    try {
-        val prefs = ctx.getSharedPreferences("wallpaper_prefs", Context.MODE_PRIVATE)
-        val uniqueList = list.distinctBy { it.id }
-        prefs.edit().putString(key, Gson().toJson(uniqueList)).apply()
-    } catch (_: Exception) {}
+    val prefs = ctx.getSharedPreferences("wall_prefs", Context.MODE_PRIVATE)
+    val encoded = list.distinctBy { it.id }.joinToString(";;") {
+        "${it.id}|${it.urls.regular}|${it.urls.full}|${it.urls.small}"
+    }
+    prefs.edit().putString(key, encoded).apply()
 }
 
 class MainActivity : ComponentActivity() {
@@ -63,8 +62,8 @@ fun WallpaperAppRoot() {
     var selectedTab by remember { mutableStateOf(1) }
     var previewPhoto by remember { mutableStateOf<UnsplashPhoto?>(null) }
 
-    val favourites = remember { mutableStateListOf<UnsplashPhoto>().apply { addAll(loadSavedList(ctx, "fav_list")) } }
-    val recentlyApplied = remember { mutableStateListOf<UnsplashPhoto>().apply { addAll(loadSavedList(ctx, "recent_list")) } }
+    val favourites = remember { mutableStateListOf<UnsplashPhoto>().apply { addAll(loadSavedList(ctx, "favs")) } }
+    val recentlyApplied = remember { mutableStateListOf<UnsplashPhoto>().apply { addAll(loadSavedList(ctx, "recents")) } }
 
     var homePhotos by remember { mutableStateOf<List<UnsplashPhoto>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
@@ -115,7 +114,7 @@ fun WallpaperAppRoot() {
         } else {
             favourites.add(0, photo)
         }
-        savePhotoList(ctx, "fav_list", favourites)
+        savePhotoList(ctx, "favs", favourites)
     }
 
     if (showWelcome) {
@@ -158,7 +157,7 @@ fun WallpaperAppRoot() {
                     onApplied = {
                         recentlyApplied.removeAll { it.id == previewPhoto!!.id }
                         recentlyApplied.add(0, previewPhoto!!)
-                        savePhotoList(ctx, "recent_list", recentlyApplied)
+                        savePhotoList(ctx, "recents", recentlyApplied)
                     },
                     onBack = { previewPhoto = null }
                 )
