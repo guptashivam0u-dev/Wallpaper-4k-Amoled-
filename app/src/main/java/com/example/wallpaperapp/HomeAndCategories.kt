@@ -89,14 +89,12 @@ fun HomeScreen(
             ) {
                 items(photos, key = { it.id }) { ph ->
                     val isFav = favourites.any { it.id == ph.id }
-                    WallpaperGridItem(
-                        photo = ph,
-                        isFav = isFav,
-                        onToggleFav = { onToggleFav(ph) },
-                        onClick = { onSelectPhoto(ph) }
-                    )
-                }
-
+WallpaperGridItem(
+    photo = ph,
+    isFav = isFav,
+    onToggleFav = { onToggleFav(ph) },
+    onClick = { onSelectPhoto(ph) }
+)
                 if (isLoadingMore) {
                     item(span = { GridItemSpan(3) }) {
                         Box(
@@ -160,8 +158,10 @@ fun WallpaperGridItem(
 @Composable
 fun CategoriesScreen(
     api: UnsplashApiService,
+    favourites: List<UnsplashPhoto>,
+    onToggleFav: (UnsplashPhoto) -> Unit,
     onSelectPhoto: (UnsplashPhoto) -> Unit
-) {
+)
     val cats = remember {
         listOf(
             CategoryItem("Abstract", "abstract 3d dark", "https://raw.githubusercontent.com/guptashivam0u-dev/Wallpaper-4k-Amoled-/refs/heads/main/Meta_AI_AQNVhebh_gt6ScAN-kRtYkaw4iY8KSRc4njDPkkk7Zy8y97m_USSFjZcSgpY_Yz9zDd-Mw-aDyyHFmlQTc2CgojO_20261127_004509.jpg"),
