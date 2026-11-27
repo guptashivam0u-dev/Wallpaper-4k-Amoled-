@@ -100,7 +100,12 @@ fun WallpaperGridItem(photo: UnsplashPhoto, isFav: Boolean, onToggleFav: () -> U
 data class LocalCategoryItem(val name: String, val query: String, val imageRes: Int)
 
 @Composable
-fun CategoriesScreen(api: UnsplashApiService, favourites: List<UnsplashPhoto>, onToggleFav: (UnsplashPhoto) -> Unit, onSelectPhoto: (UnsplashPhoto) -> Unit) {
+fun CategoriesScreen(
+    api: UnsplashApiService,
+    favourites: List<UnsplashPhoto> = emptyList(),
+    onToggleFav: (UnsplashPhoto) -> Unit = {},
+    onSelectPhoto: (UnsplashPhoto) -> Unit
+) {
     val cats = remember {
         listOf(
             LocalCategoryItem("Abstract", "abstract 3d dark", R.drawable.cat_abstract),
