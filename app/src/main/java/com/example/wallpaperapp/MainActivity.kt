@@ -55,6 +55,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
 @Composable
 fun WallpaperAppRoot() {
     val ctx = LocalContext.current
@@ -76,20 +77,26 @@ fun WallpaperAppRoot() {
         else if (selectedTab != 1) selectedTab = 1
     }
 
+    // 1. पहले api को सही URL के साथ बनाएं
     val api = remember {
         Retrofit.Builder()
-            .baseUrl("https://unsplash.com")
+            .baseUrl("https://api.unsplash.com/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(UnsplashApiService::class.java)
     }
 
+    // 2. उसके बाद ही LaunchedEffect में api का उपयोग करें
     LaunchedEffect(Unit) {
         try {
             if (UNSPLASH_API_KEY != "YOUR_UNSPLASH_API_KEY") {
                 homePhotos = api.getPhotos(UNSPLASH_API_KEY, page = 1, perPage = 30)
             }
-        } catch (e: Exception) { e.printStackTrace() } finally { isLoading = false }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            isLoading = false
+        }
     }
 
     fun loadMoreHomePhotos() {
@@ -104,7 +111,11 @@ fun WallpaperAppRoot() {
                     homePhotos = homePhotos + newPhotos.filter { it.id !in existingIds }
                     currentPage = nextPage
                 }
-            } catch (e: Exception) { e.printStackTrace() } finally { isLoadingMore = false }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            } finally {
+                isLoadingMore = false
+            }
         }
     }
 
